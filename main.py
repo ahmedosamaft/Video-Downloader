@@ -1,7 +1,10 @@
+# Import Modules
 from pytube import YouTube
 from art import *
 from Color_Console import ctext
+import datetime
 
+# Functions
 def download (yt): 
   return yt.download()
 
@@ -15,10 +18,10 @@ def streams(yt):
   return yt.streams.filter(file_extension='mp4')
 
 def length(yt):
-  return round(yt.length / 60,ndigits=2)
+  return str(datetime.timedelta(seconds=yt.length))
 
-def size(yt,itag):
-  return yt.streams.get_by_itag(itag).filesize_mb
+def size(yt):
+  return yt.filesize_mb
 
 def resolutions(yt): 
   res = set([i.resolution for i in streams(yt)])
@@ -39,17 +42,14 @@ def on_progress(vid, chunk, bytes_remaining):
     percentage_of_completion = round(percentage_of_completion,2)
     print(f'Download Progress: {percentage_of_completion}%, Total Size:{totalsz} MB, Downloaded: {dwnd} MB, Remaining:{remain} MB')
 
-
-
-# link = "https://www.youtube.com/watch?v=ly7OBjYt8s8"
-
-
-Art=text2art("     OSOS\nVideo Downloader", font="cybermedium")
+# Credentials & Title
+Art = text2art("     OSOS\nVideo Downloader", font="cybermedium")
 ctext(Art,"red","black")
 ctext('=' * 70,"blue","black")
 ctext("Made By: Ahmed Osama | FB:www.facebook.com/ahmed.osama.572","white","red")
 ctext('=' * 70,"blue","black")
 
+# Prompt URL
 while(True):
   try:
     link = input("Plese Enter Video URL:")
@@ -57,16 +57,18 @@ while(True):
     break
   except:
     ctext("URL is Not Correct Check Again Please.","red","black")
-    
+
+# Show Video Data
 ctext('=' * 70,"blue","black")
 print("Video Name: ",end="")
 ctext(f"{title(yt)}","green","black")
 print("Video Length: ",end="")
-ctext(f"{length(yt)} mins","green","black")
+ctext(f"{length(yt)}","green","black")
 print("\bVideo Author: ",end="")
 ctext(f"{author(yt)}","green","black")
 ctext('=' * 70,"blue","black")
-# https://www.youtube.com/watch?v=UYDw_627QLg&list=PLDlH6NfW8TnBaPG9R4-aLbeB8cvBVdTmD&index=7&t=5s&ab_channel=AhmedOsama
+
+# Show Video Resolutions
 print("Available Resolutions:")
 resolution = resolutions(yt)
 for i in resolution: 
@@ -74,6 +76,7 @@ for i in resolution:
     print(f"{i}p | ",end="")
 print(f"{resolution[len(resolution) - 1]}p")
 
+# Prompt Resolution
 while True:
   try:
       quality = int(input("Choose a Quality [ex: 720]: "))
@@ -86,24 +89,29 @@ while True:
   else :
     break
 
+# Choose Specific Resolution
 for i in streams(yt):
   if(f"{quality}p" == i.resolution and i.includes_video_track):
     video = i
     break
-print("Video Size: ", end='')
-ctext(f"{video.filesize_mb} MB","green","black")
 
+# Show Video Size
+print("Video Size: ", end='')
+ctext(f"{size(video)} MB","green","black")
+
+# Prompt If Agree On Download?
 choose = input("Are you sure to Download? [Y / N] ").upper()
 
 if(choose == "Y"):
   try:
-    video.download()
+    download(video)
     ctext("Downloaded Successfully!","green","black")
     ctext("Thanks For Using Downloader 💘❤","white","blue")
   except:
-    ctext("Failed to Download💥👎. Try again!","red","black")
+    ctext("Failed to Download 💥👎. Try again!","red","black")
 else:
     ctext("Thanks For Using Downloader 💘❤","white","blue")
 
+# Pause Console
 input()
 
