@@ -3,31 +3,26 @@ from pytube import YouTube
 from art import *
 from Color_Console import ctext
 import datetime
+# YouTube("https://www.youtube.com/watch?v=UYDw_627QLg&list=PLDlH6NfW8TnBaPG9R4-aLbeB8cvBVdTmD&index=7&t=2s").streams.get_lowest_resolution().download()
 
 # Functions
-def download (yt): 
-  return yt.download()
-
-def title(yt):
-  return yt.title
+def length(yt):
+  return datetime.timedelta(seconds=yt.length)
 
 def author(yt):
   return yt.author
 
+def title(yt):
+  return yt.title
+
+def resolutions(yt):
+  videos = yt.streams.filter(file_extension="mp4",only_video=True)
+  resolutions = [video.resolution for video in videos]
+  return resolutions
+
 def streams(yt):
-  return yt.streams.filter(file_extension='mp4')
+  return yt.streams.filter(file_extension="mp4",only_video=True)
 
-def length(yt):
-  return str(datetime.timedelta(seconds=yt.length))
-
-def size(yt):
-  return yt.filesize_mb
-
-def resolutions(yt): 
-  res = set([i.resolution for i in streams(yt)])
-  arr = [int(i.replace("p","")) for i in res if i in ["1080p", "720p" , "360p", "480p","144p"]]
-  arr.sort()
-  return arr
 
 def on_progress(vid, chunk, bytes_remaining):
     total_size = vid.filesize
@@ -42,6 +37,7 @@ def on_progress(vid, chunk, bytes_remaining):
     percentage_of_completion = round(percentage_of_completion,2)
     print(f'Download Progress: {percentage_of_completion}%, Total Size:{totalsz} MB, Downloaded: {dwnd} MB, Remaining:{remain} MB')
 
+
 # Credentials & Title
 Art = text2art("     OSOS\nVideo Downloader", font="cybermedium")
 ctext(Art,"red","black")
@@ -49,69 +45,67 @@ ctext('=' * 70,"blue","black")
 ctext("Made By: Ahmed Osama | FB:www.facebook.com/ahmed.osama.572","white","red")
 ctext('=' * 70,"blue","black")
 
+
 # Prompt URL
-while(True):
-  try:
-    link = input("Plese Enter Video URL:")
-    yt = YouTube(link,on_progress_callback=on_progress)
-    break
-  except:
+while True:
+  try: 
+    link = input("Please Enter Video URL: ")
+    yt = YouTube(link,on_progress)
+  except: 
     ctext("URL is Not Correct Check Again Please.","red","black")
+  else:
+    break
 
 # Show Video Data
 ctext('=' * 70,"blue","black")
 print("Video Name: ",end="")
-ctext(f"{title(yt)}","green","black")
+ctext(title(yt),"green","black")
 print("Video Length: ",end="")
-ctext(f"{length(yt)}","green","black")
-print("\bVideo Author: ",end="")
-ctext(f"{author(yt)}","green","black")
+ctext(length(yt),"green","black")
+print("Video Author: ",end="")
+ctext(author(yt),"green","black")
 ctext('=' * 70,"blue","black")
 
 # Show Video Resolutions
-print("Available Resolutions:")
-resolution = resolutions(yt)
-for i in resolution: 
-  if i !=  resolution[len(resolution) - 1]:
-    print(f"{i}p | ",end="")
-print(f"{resolution[len(resolution) - 1]}p")
+print("Available Resolutions: ", end="")
+resolutionsList = resolutions(yt)
+ctext(" | ".join(resolutionsList),"green","black")
+ctext('=' * 70,"blue","black")
 
 # Prompt Resolution
 while True:
-  try:
-      quality = int(input("Choose a Quality [ex: 720]: "))
-      if(quality not in resolution):
-        raise SyntaxError("Not Valid Value")
-  except ValueError:
-    ctext("Please Choose a Quality Number only like [720]", "red", "black")
-  except SyntaxError:
-      ctext("Please Choose a Quality From the list Above 👆", "red", "black")
-  else :
+  try: 
+    res = input("Choose a Quality [ex: 720p]: ").lower().strip()
+    if(res not in resolutionsList):
+      raise ValueError("Not Valid Value")
+  except: 
+    ctext("Please Choose a Quality From the list Above 👆","red","black")
+  else:
     break
 
 # Choose Specific Resolution
-for i in streams(yt):
-  if(f"{quality}p" == i.resolution and i.includes_video_track):
-    video = i
-    break
+for video in streams(yt):
+  if video.resolution == res:
+    choose = video
 
 # Show Video Size
 print("Video Size: ", end='')
-ctext(f"{size(video)} MB","green","black")
+ctext(f"{choose.filesize_mb} MB","green","black")
+ctext('=' * 70,"blue","black")
 
 # Prompt If Agree On Download?
-choose = input("Are you sure to Download? [Y / N] ").upper()
+ch = input("Are you sure to Download? [Y / N] ").upper()
 
-if(choose == "Y"):
+if(ch == "Y"):
   try:
-    download(video)
-    ctext("Downloaded Successfully!","green","black")
-    ctext("Thanks For Using Downloader 💘❤","white","blue")
+      choose.download()
+      ctext("Downloaded Successfully!","green","black")
+      ctext("Thanks For Using Downloader 💘❤","white","blue")
   except:
     ctext("Failed to Download 💥👎. Try again!","red","black")
 else:
-    ctext("Thanks For Using Downloader 💘❤","white","blue")
+  ctext("Thanks For Using Downloader 💘❤","white","blue")
+
 
 # Pause Console
 input()
-
